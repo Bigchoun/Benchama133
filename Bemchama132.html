@@ -1,0 +1,943 @@
+<!doctype html>
+<html lang="th">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Congratulations BRR 133</title>
+
+    <!-- Google Fonts: Prompt -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;600;700&display=swap"
+      rel="stylesheet"
+    />
+
+    <!-- Canvas Confetti Library -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+    <style>
+      /* =========================================
+           CSS VARIABLES & RESET
+        ========================================= */
+      :root {
+        --primary-blue: #5ab2ff; /* สีฟ้าสว่าง */
+        --dark-blue: #0a2647; /* สีฟ้าเข้มสำหรับตัวอักษรหรือพื้นหลัง */
+        --primary-yellow: #ffd700; /* สีเหลืองทอง */
+        --light-yellow: #fff8c9;
+        --white: #ffffff;
+      }
+
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: "Prompt", sans-serif;
+      }
+
+      body {
+        height: 100vh;
+        overflow: hidden; /* ป้องกันการเลื่อนหน้าจอสำหรับ Landing Page */
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        background-color: var(--dark-blue);
+        color: var(--white);
+      }
+
+      /* =========================================
+           INTRO ANIMATION (TRANSITION)
+        ========================================= */
+      .intro-screen {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: var(--dark-blue);
+        z-index: 9999;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        flex-direction: column;
+        transition:
+          opacity 0.8s ease-in-out,
+          visibility 0.8s ease-in-out;
+      }
+
+      .intro-screen.hidden {
+        opacity: 0;
+        visibility: hidden;
+      }
+
+      .flying-paper-plane {
+        width: 120px;
+        height: 120px;
+        position: absolute;
+        left: -150px;
+        bottom: 20%;
+        animation: flyAcross 4s ease-in-out forwards;
+        filter: drop-shadow(0 10px 15px rgba(0, 0, 0, 0.5));
+      }
+
+      .intro-text {
+        color: var(--primary-yellow);
+        font-size: 1.8rem;
+        font-weight: 600;
+        letter-spacing: 2px;
+        opacity: 0;
+        animation: pulseText 4s ease-in-out forwards;
+      }
+
+      @keyframes flyAcross {
+        0% {
+          transform: translate(0, 10vh) scale(0.5) rotate(20deg);
+          opacity: 0;
+        }
+        15% {
+          opacity: 1;
+          transform: translate(20vw, -2vh) scale(0.8) rotate(10deg);
+        }
+        50% {
+          transform: translate(50vw, -15vh) scale(1.1) rotate(-2deg);
+        }
+        85% {
+          opacity: 1;
+          transform: translate(90vw, -30vh) scale(0.8) rotate(-15deg);
+        }
+        100% {
+          transform: translate(130vw, -50vh) scale(0.6) rotate(-25deg);
+          opacity: 0;
+        }
+      }
+
+      @keyframes pulseText {
+        0%,
+        100% {
+          opacity: 0;
+        }
+        30%,
+        70% {
+          opacity: 1;
+        }
+      }
+
+      /* =========================================
+           BACKGROUND SLIDESHOW & OVERLAY
+        ========================================= */
+      .bg-slideshow {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: -2;
+      }
+
+      .bg-image {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-size: cover;
+        background-position: center;
+        opacity: 0;
+        transition: opacity 2s ease-in-out;
+      }
+
+      .bg-image.active {
+        opacity: 1;
+      }
+
+      /* Overlay เพื่อให้ตัวหนังสืออ่านง่ายขึ้น */
+      .overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(
+          to bottom,
+          rgba(10, 38, 71, 0.6),
+          rgba(10, 38, 71, 0.9)
+        );
+        z-index: -1;
+        backdrop-filter: blur(3px); /* ทำให้พื้นหลังเบลอนิดๆ */
+      }
+
+      /* =========================================
+           MAIN CONTENT
+        ========================================= */
+      .main-container {
+        text-align: center;
+        z-index: 10;
+        padding: 20px;
+        max-width: 800px;
+        width: 100%;
+      }
+
+      .hero-text {
+        font-size: clamp(2.5rem, 6vw, 4.5rem);
+        font-weight: 700;
+        color: var(--primary-yellow);
+        text-shadow: 2px 4px 10px rgba(0, 0, 0, 0.5);
+        margin-bottom: 10px;
+        line-height: 1.2;
+        animation: fadeInDown 1.5s ease;
+      }
+
+      .sub-text {
+        font-size: clamp(1rem, 3vw, 1.5rem);
+        color: var(--primary-blue);
+        margin-bottom: 40px;
+        font-weight: 300;
+        animation: fadeInUp 1.5s ease;
+      }
+
+      /* =========================================
+           INTERACTIVE ENVELOPE
+        ========================================= */
+      .envelope-wrapper {
+        margin: 0 auto 40px auto;
+        cursor: pointer;
+        transition: transform 0.3s ease;
+        animation: float 3s ease-in-out infinite;
+      }
+
+      .envelope-wrapper:hover {
+        transform: scale(1.05);
+      }
+
+      .envelope-label {
+        margin-top: 15px;
+        font-size: 0.9rem;
+        color: var(--light-yellow);
+        opacity: 0.8;
+        letter-spacing: 1px;
+      }
+
+      /* สร้างไอคอนซองจดหมายด้วย CSS */
+      .envelope {
+        position: relative;
+        width: 150px;
+        height: 100px;
+        background-color: var(--primary-blue);
+        margin: 0 auto;
+        border-radius: 5px;
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+      }
+
+      .envelope::before {
+        /* ฝาปิดซอง */
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 0;
+        height: 0;
+        border-left: 75px solid transparent;
+        border-right: 75px solid transparent;
+        border-top: 55px solid #82c8ff;
+        z-index: 3;
+        transform-origin: top;
+        transition: transform 0.5s ease;
+      }
+
+      .envelope::after {
+        /* รอยพับด้านล่าง */
+        content: "";
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        border-left: 75px solid #4aa3f0;
+        border-right: 75px solid #4aa3f0;
+        border-bottom: 50px solid #3b94e1;
+        border-top: 50px solid transparent;
+        z-index: 2;
+      }
+
+      .envelope-paper {
+        position: absolute;
+        top: 5px;
+        left: 5px;
+        width: 140px;
+        height: 90px;
+        background-color: var(--white);
+        z-index: 1;
+        transition: transform 0.5s ease;
+      }
+
+      /* เมื่อกดเปิดซอง */
+      .envelope-wrapper.open .envelope::before {
+        transform: rotateX(180deg);
+        z-index: 0;
+      }
+      .envelope-wrapper.open .envelope-paper {
+        transform: translateY(-40px);
+      }
+
+      /* =========================================
+           RANDOM WISH GENERATOR
+        ========================================= */
+      .wish-section {
+        margin-top: 20px;
+        animation: fadeInUp 2s ease;
+      }
+
+      .btn-random {
+        background-color: var(--primary-yellow);
+        color: var(--dark-blue);
+        border: none;
+        padding: 12px 30px;
+        font-size: 1.1rem;
+        font-weight: 600;
+        border-radius: 50px;
+        cursor: pointer;
+        box-shadow: 0 4px 15px rgba(255, 215, 0, 0.4);
+        transition: all 0.3s ease;
+        font-family: "Prompt", sans-serif;
+      }
+
+      .btn-random:hover {
+        background-color: var(--white);
+        transform: translateY(-3px);
+        box-shadow: 0 6px 20px rgba(255, 215, 0, 0.6);
+      }
+
+      .btn-random:active {
+        transform: translateY(1px);
+      }
+
+      .fortune-display {
+        margin-top: 25px;
+        min-height: 60px;
+        font-size: 1.3rem;
+        font-weight: 400;
+        color: var(--white);
+        padding: 0 20px;
+        transition: opacity 0.3s ease;
+      }
+
+      /* =========================================
+           SHARE BUTTON
+        ========================================= */
+      .share-section {
+        margin-top: 30px;
+        animation: fadeInUp 2.5s ease;
+      }
+
+      .btn-share {
+        background-color: transparent;
+        color: var(--primary-blue);
+        border: 2px solid var(--primary-blue);
+        padding: 8px 24px;
+        font-size: 0.95rem;
+        font-weight: 400;
+        border-radius: 50px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        font-family: "Prompt", sans-serif;
+      }
+
+      .btn-share:hover {
+        background-color: var(--primary-blue);
+        color: var(--white);
+        box-shadow: 0 4px 15px rgba(90, 178, 255, 0.4);
+      }
+
+      /* =========================================
+           MODAL (LETTER CONTENT)
+        ========================================= */
+      .modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(10, 38, 71, 0.85);
+        z-index: 100;
+        justify-content: center;
+        align-items: center;
+        backdrop-filter: blur(5px);
+        opacity: 0;
+        transition: opacity 0.4s ease;
+      }
+
+      .modal.show {
+        display: flex;
+        opacity: 1;
+      }
+
+      .modal-content {
+        background-color: var(--white);
+        color: #333;
+        width: 90%;
+        max-width: 600px;
+        padding: 40px;
+        border-radius: 15px;
+        position: relative;
+        transform: translateY(50px);
+        transition: transform 0.4s ease;
+        box-shadow: 0 15px 30px rgba(0, 0, 0, 0.5);
+        max-height: 80vh;
+        overflow-y: auto;
+      }
+
+      .modal.show .modal-content {
+        transform: translateY(0);
+      }
+
+      .close-btn {
+        position: absolute;
+        top: 15px;
+        right: 20px;
+        font-size: 1.5rem;
+        color: #888;
+        cursor: pointer;
+        transition: color 0.3s;
+      }
+
+      .close-btn:hover {
+        color: #333;
+      }
+
+      .letter-text {
+        font-size: 1.1rem;
+        line-height: 1.8;
+        text-align: left;
+      }
+
+      .letter-text h2 {
+        color: var(--dark-blue);
+        margin-bottom: 20px;
+        text-align: center;
+      }
+
+      /* =========================================
+           ANIMATIONS
+        ========================================= */
+      @keyframes fadeInDown {
+        from {
+          opacity: 0;
+          transform: translateY(-30px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      @keyframes fadeInUp {
+        from {
+          opacity: 0;
+          transform: translateY(30px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      @keyframes float {
+        0% {
+          transform: translateY(0px);
+        }
+        50% {
+          transform: translateY(-10px);
+        }
+        100% {
+          transform: translateY(0px);
+        }
+      }
+
+      /* =========================================
+           BIGCHOUN (WALKING PIXEL CHARACTER)
+        ========================================= */
+      .bigchoun-container {
+        position: absolute;
+        bottom: 30px;
+        left: -100px;
+        z-index: 50;
+        cursor: pointer;
+        animation: walkAcross 20s linear infinite;
+      }
+
+      .bigchoun-bounce {
+        animation: bounceWalk 0.4s steps(2, end) infinite;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+
+      .bigchoun-name {
+        background-color: rgba(0, 0, 0, 0.6);
+        color: #ffd700;
+        font-size: 0.7rem;
+        padding: 2px 6px;
+        border-radius: 10px;
+        margin-bottom: 5px;
+        font-weight: 600;
+        letter-spacing: 1px;
+      }
+
+      .pixel-svg {
+        width: 50px;
+        height: 50px;
+        image-rendering: pixelated; /* ทำให้ดูเป็น 8-bit */
+        filter: drop-shadow(2px 2px 0px rgba(0, 0, 0, 0.5));
+        transition: transform 0.2s;
+      }
+
+      .bigchoun-container:hover .pixel-svg {
+        transform: scale(1.1);
+      }
+
+      /* เอฟเฟกต์เดินสลับซ้ายขวา */
+      @keyframes walkAcross {
+        0% {
+          left: -10%;
+          transform: scaleX(1);
+        }
+        49.9% {
+          left: 110%;
+          transform: scaleX(1);
+        }
+        50% {
+          left: 110%;
+          transform: scaleX(-1);
+        }
+        99.9% {
+          left: -10%;
+          transform: scaleX(-1);
+        }
+        100% {
+          left: -10%;
+          transform: scaleX(1);
+        }
+      }
+
+      /* เอฟเฟกต์กระโดดเบาๆ เหมือนกำลังก้าวเดิน */
+      @keyframes bounceWalk {
+        0%,
+        100% {
+          transform: translateY(0);
+        }
+        50% {
+          transform: translateY(-4px);
+        }
+      }
+
+      /* =========================================
+           PAPER MODAL (BIGCHOUN'S MESSAGE)
+        ========================================= */
+      .paper-content {
+        background-color: #fdf6e3; /* สีกระดาษถนอมสายตา */
+        background-image: repeating-linear-gradient(
+          transparent,
+          transparent 29px,
+          #d1d5db 30px
+        );
+        color: #333;
+        width: 90%;
+        max-width: 500px;
+        padding: 40px 30px 30px 30px;
+        border-radius: 2px;
+        position: relative;
+        transform: translateY(50px) rotate(-2deg); /* เอียงกระดาษนิดๆ ให้ดูธรรมชาติ */
+        transition: transform 0.4s ease;
+        box-shadow: 4px 6px 15px rgba(0, 0, 0, 0.4);
+        max-height: 80vh;
+        overflow-y: auto;
+        font-family: "Prompt", sans-serif;
+        line-height: 30px; /* ให้ตรงกับเส้นบรรทัด */
+      }
+
+      .modal.show .paper-content {
+        transform: translateY(0) rotate(0deg);
+      }
+
+      .paper-text h2 {
+        color: #0a2647;
+        text-align: center;
+        font-size: 1.5rem;
+        margin-bottom: 10px;
+        background-color: #fdf6e3; /* บังเส้นบรรทัดตรงหัวข้อ */
+        display: inline-block;
+        padding: 0 10px;
+      }
+
+      .paper-text-center {
+        text-align: center;
+        margin-bottom: 15px;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- หน้า Intro Animation (แสดงตอนโหลดหน้าเว็บ) -->
+    <div id="introScreen" class="intro-screen">
+      <!-- SVG เครื่องบินกระดาษกำลังร่อน -->
+      <svg
+        class="flying-paper-plane"
+        viewBox="0 0 24 24"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path
+          d="M21.95 2.04999C22.05 2.14999 22.1 2.29999 22.05 2.44999L15.4 21.65C15.3 21.9 15.05 22.05 14.8 22C14.55 21.95 14.35 21.75 14.3 21.5L11.5 13.5L3.5 10.7C3.25 10.65 3.05 10.45 3 10.2C2.95 9.94999 3.1 9.69999 3.35 9.59999L22.55 2.94999C22.7 2.89999 22.85 2.94999 22.95 3.04999L21.95 2.04999Z"
+          fill="#FFFFFF"
+        />
+        <path
+          d="M11.5 13.5L21.95 2.04999C22.05 2.14999 22.1 2.29999 22.05 2.44999L15.4 21.65C15.3 21.9 15.05 22.05 14.8 22C14.55 21.95 14.35 21.75 14.3 21.5L11.5 13.5Z"
+          fill="#E0E0E0"
+        />
+        <path
+          d="M11.5 13.5L22.95 3.04999C22.85 2.94999 22.7 2.89999 22.55 2.94999L3.35 9.59999C3.1 9.69999 2.95 9.94999 3 10.2C3.05 10.45 3.25 10.65 3.5 10.7L11.5 13.5Z"
+          fill="#F5F5F5"
+        />
+      </svg>
+      <div class="intro-text">กำลังออกเดินทาง...</div>
+    </div>
+
+    <!-- พื้นหลัง Slideshow -->
+    <div class="bg-slideshow" id="slideshow">
+      <!-- 💡 คุณสามารถเปลี่ยน URL รูปภาพด้านล่างเป็นรูปโรงเรียน บ.ฉ. ของจริงได้เลยครับ -->
+      <div
+        class="bg-image active"
+        style="
+          background-image: url(&quot;https://scontent.fbkk23-1.fna.fbcdn.net/v/t39.30808-6/613104336_1181676267454373_6339440439477936077_n.jpg?_nc_cat=106&ccb=1-7&_nc_sid=7b2446&_nc_ohc=34caYQei1xIQ7kNvwGdO0R8&_nc_oc=Adke4fMicJCy_ahSt5FgtwVQuXtJCNTv4jSb_60sGzxBbenki8Ke9Cib9tXoPND8iE1Mov1iSbgaAdfx4_noxDN0&_nc_zt=23&_nc_ht=scontent.fbkk23-1.fna&_nc_gid=5PZ63tV_7T-e3HdKY9AwRQ&oh=00_AftXCeST4ndfQWuyzpqcMVVFriN1g-04FRZRAwOpt6BCKw&oe=699DD7BC&quot;);
+        "
+      ></div>
+      <div
+        class="bg-image"
+        style="
+          background-image: url(&quot;https://scontent.fbkk23-1.fna.fbcdn.net/v/t39.30808-6/577128174_1135410758747591_7066620711700324851_n.jpg?_nc_cat=110&ccb=1-7&_nc_sid=13d280&_nc_ohc=tbDBx6gVS3gQ7kNvwH7UM1G&_nc_oc=Adk7UZEVvv3CvAk7MVajHJmBYhXbbnpEVCXp98OMXpitqONgTMVuQtk8Q9qWNFfDIeBn2kspkRRffLkFh3DyOG8q&_nc_zt=23&_nc_ht=scontent.fbkk23-1.fna&_nc_gid=SYwOLmK3yi-k2ZXmJE_3dw&oh=00_AftTEO1EdosMC68J6GWIB_yHV3tHz_drszNtZ_7ubMFY-A&oe=699DD0C6&quot;);
+        "
+      ></div>
+      <div
+        class="bg-image"
+        style="
+          background-image: url(&quot;https://scontent.fbkk23-1.fna.fbcdn.net/v/t39.30808-6/539467234_1077431764545491_7694596027173173598_n.jpg?_nc_cat=105&ccb=1-7&_nc_sid=7b2446&_nc_ohc=_N6oyBN7CLgQ7kNvwHnWGLA&_nc_oc=Adn85XGyzmXLJohMy4PRewRAgy-I8CbuK9vAjOGuJu50WSPqVpsEgvExt4YCoauUK179yKMuC6I7icJZBJK00FJP&_nc_zt=23&_nc_ht=scontent.fbkk23-1.fna&_nc_gid=aS8IPx5ySezLvMeX3_iKIA&oh=00_Afuu1R81uwRpsyXBHtUWHHL12usc4BCA4C-0dV2AydSRBw&oe=699DF175&quot;);
+        "
+      ></div>
+      <div
+        class="bg-image active"
+        style="
+          background-image: url(&quot;https://scontent.fbkk23-1.fna.fbcdn.net/v/t39.30808-6/540336535_1077433027878698_1980789015571287884_n.jpg?_nc_cat=108&ccb=1-7&_nc_sid=7b2446&_nc_ohc=BQjhdy8CdnIQ7kNvwEOSSa2&_nc_oc=AdmgU-ZJ8b0CtoPlQauUXzsd8sCl6mYQpIHmZX9BCA34jGJgw0UIq6GCByNrPhK21otbwP4k122y9-GIkaV-cy-S&_nc_zt=23&_nc_ht=scontent.fbkk23-1.fna&_nc_gid=4VD7aEDpqHAoMvIIsKJaYw&oh=00_Afsi96S-1L1XIr5obxDOOxqD_aqTe1i6_b5E_KNwR-v9jw&oe=699DCCBA&quot;);
+        "
+      ></div>
+      <div
+        class="bg-image active"
+        style="
+          background-image: url(&quot;https://scontent.fbkk23-1.fna.fbcdn.net/v/t39.30808-6/539441267_1077430547878946_9151242699831544310_n.jpg?_nc_cat=105&ccb=1-7&_nc_sid=7b2446&_nc_ohc=T20TtlEh2hoQ7kNvwFmWqQm&_nc_oc=Adk0YfiuJ4F3y_KOfrq6cGPUo4wgcQ9rDIROfSkWa9hDPpLklDRss-MqfEjtAYe3InQAkmHPD_01k1ozDJLFJcpa&_nc_zt=23&_nc_ht=scontent.fbkk23-1.fna&_nc_gid=wOa5Lyc6Sds0ItAwp15n-w&oh=00_AfstYhZw_3gtupANV0UkIzC6_CbfekSBZZ0ja9YL3HAjiw&oe=699DEDFA&quot;);
+        "
+      ></div>
+      <div
+        class="bg-image active"
+        style="
+          background-image: url(&quot;https://scontent.fbkk23-1.fna.fbcdn.net/v/t39.30808-6/539832048_1077431484545519_1597943159732978676_n.jpg?_nc_cat=101&ccb=1-7&_nc_sid=7b2446&_nc_ohc=DkKI6j0I9fgQ7kNvwFIZFKm&_nc_oc=AdnGCHHHYpdg2aUNi1P6iIZ2JVM40txW05ER3I6EL7X3hxCxrQC-1b_McUlHPc8kb8MbjUjB_913HH4uOfXgXiuD&_nc_zt=23&_nc_ht=scontent.fbkk23-1.fna&_nc_gid=DLpNtaBYD83UZ1QNEHCT-Q&oh=00_AfupbHlxKLUpWIZJm7B83W8GY6gR6QUtRpkCHAf70JZvMA&oe=699DDF61&quot;);
+        "
+      ></div>
+    </div>
+
+    <!-- ฟิลเตอร์สีเข้มทับพื้นหลัง -->
+    <div class="overlay"></div>
+
+    <!-- คอนเทนต์หลัก -->
+    <main class="main-container">
+      <h1 class="hero-text">Congratulations<br />BRR 133</h1>
+      <p class="sub-text">
+        ยินดีด้วยกับความสำเร็จ ก้าวต่อไปในรั้วมหาวิทยาลัยนะ!
+      </p>
+
+      <!-- ซองจดหมาย Interactive -->
+      <div class="envelope-wrapper" id="envelopeBtn" onclick="openLetter()">
+        <div class="envelope">
+          <div class="envelope-paper"></div>
+        </div>
+        <p class="envelope-label">คลิกเพื่อเปิดจดหมาย</p>
+      </div>
+
+      <!-- ส่วนสุ่มคำอวยพร -->
+      <div class="wish-section">
+        <button class="btn-random" onclick="generateFortune()">
+          ✨ สุ่มคำอวยพรสู่รั้วมหาวิทยาลัย ✨
+        </button>
+        <p class="fortune-display" id="fortuneDisplay"></p>
+      </div>
+
+      <!-- 🔗 ปุ่มแชร์ลิงก์ -->
+      <div class="share-section">
+        <button class="btn-share" id="shareBtn" onclick="copyLink()">
+          🔗 แชร์ให้เพื่อน
+        </button>
+      </div>
+    </main>
+
+    <!-- ตัวละคร Bigchoun เดินไปมา -->
+    <div class="bigchoun-container" onclick="openBigchounPaper()">
+      <div class="bigchoun-bounce">
+        <div class="bigchoun-name">Bigchoun</div>
+        <!-- SVG ตัวละครพิกเซล -->
+        <svg
+          class="pixel-svg"
+          viewBox="0 0 16 16"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <!-- ผม -->
+          <rect x="5" y="2" width="6" height="2" fill="#3E2723" />
+          <rect x="4" y="3" width="8" height="2" fill="#3E2723" />
+          <!-- หน้า -->
+          <rect x="5" y="4" width="6" height="4" fill="#FFCC80" />
+          <rect x="4" y="5" width="1" height="2" fill="#FFCC80" />
+          <rect x="11" y="5" width="1" height="2" fill="#FFCC80" />
+          <!-- ตา -->
+          <rect x="6" y="5" width="1" height="1" fill="#000000" />
+          <rect x="9" y="5" width="1" height="1" fill="#000000" />
+          <!-- เสื้อ (สีฟ้า) -->
+          <rect x="4" y="8" width="8" height="4" fill="#5AB2FF" />
+          <!-- แขน -->
+          <rect x="3" y="8" width="1" height="3" fill="#FFCC80" />
+          <rect x="12" y="8" width="1" height="3" fill="#FFCC80" />
+          <!-- กางเกง (สีกรมท่า) -->
+          <rect x="5" y="12" width="2" height="3" fill="#0A2647" />
+          <rect x="9" y="12" width="2" height="3" fill="#0A2647" />
+          <!-- รองเท้า -->
+          <rect x="4" y="14" width="2" height="1" fill="#333333" />
+          <rect x="10" y="14" width="2" height="1" fill="#333333" />
+        </svg>
+      </div>
+    </div>
+
+    <!-- หน้าต่าง Pop-up แสดงเนื้อหาจดหมาย (ของเดิม) -->
+    <div class="modal" id="letterModal">
+      <div class="modal-content">
+        <span class="close-btn" onclick="closeLetter()">&times;</span>
+        <div class="letter-text">
+          <h2>ถึงน้องๆ บ.ฉ. 133 ทุกคน 💛🩵</h2>
+          <p>
+            พี่ขอแสดงความยินดีกับน้องๆ ทุกคนด้วยนะครับที่เรียนจบ ม.6 แล้ว!
+            ตลอดเวลาที่ผ่านมาในรั้วน้ำเงินเหลือง
+            พี่รู้ว่าพวกเราคงผ่านเรื่องราวมากมาย ทั้งเรื่องเรียน กีฬาสี
+            งานโรงเรียน การเตรียมตัวสอบเข้ามหาลัย ทั้งเหนื่อย ทั้งสนุก ปะปนกันไป
+          </p>
+          <br />
+          <p>
+            ก้าวต่อไปในรั้วมหาวิทยาลัยอาจจะมีสิ่งที่ท้าทายรออยู่ ขอให้น้องๆ
+            เก็บความทรงจำดีๆ ที่ บ.ฉ. ไว้เป็นกำลังใจ ขอให้ทุกคนโชคดี
+            มีความสุขกับเส้นทางที่เลือก
+            และเติบโตไปเป็นผู้ใหญ่ในแบบที่ตัวเองภูมิใจนะครับ
+          </p>
+          <br />
+          <p>
+            <strong>ด้วยความปรารถนาดี,</strong><br />48000 ณัฐชนน แสงแก้ว รุ่น
+            131
+          </p>
+          <!-- 💡 คุณสามารถแก้ข้อความด้านบนนี้ให้เป็นคำพูดของคุณเองได้เลยครับ -->
+        </div>
+      </div>
+    </div>
+
+    <!-- หน้าต่าง Pop-up กระดาษความในใจจาก Bigchoun -->
+    <div class="modal" id="paperModal">
+      <div class="paper-content">
+        <span class="close-btn" onclick="closeBigchounPaper()">&times;</span>
+        <div class="paper-text">
+          <div class="paper-text-center">
+            <h2>📝 ความในใจจาก Bigchoun</h2>
+          </div>
+          <p>
+            <!-- 💡 เขียนความในใจของคุณที่นี่ได้เลยครับ มันจะแสดงบนลายเส้นสมุดฉีก -->
+            สวัสดีน้องๆ ทุกคน บางคนอาจจะรู้จักพี่ บางคนอาจจะไม่เคยคุยกันเลย
+            แต่ถ้าได้เห็นข้อความนี้ พี่อยากบอกว่า…พี่ดีใจกับทุกคนจริงๆ ❤️
+            ยินดีด้วยกับการจบการศึกษา ความสำเร็จครั้งนี้ไม่เล็กเลย
+            มันคือผลของความพยายาม ความอดทน และวันที่เหนื่อยแต่ไม่ยอมแพ้ของทุกคน
+            พี่ต้องขอโทษที่ไม่ได้กลับไปแสดงความยินดีด้วยตัวเอง
+            ช่วงนี้พี่ติดแข่งโปรแกรม เลยพลาดโอกาสดีๆ แบบนี้ไป
+            ขอโทษที่บางครั้งทำตามสัญญาไม่ได้ และไม่ได้กลับไปหาน้องๆ
+            กับชมรมอาสาพัฒนาโรงเรียนบ่อยอย่างที่ตั้งใจ
+            ข้อความนี้ถือเป็นของขวัญเล็กๆ จากพี่ก็แล้วกัน สำหรับรุ่น 132
+            ไม่ต้องเสียใจนะ ตอนนั้นพี่ยังไม่เก่งพอจะทำอะไรแบบนี้ได้
+            แต่วันนี้พี่ภูมิใจในตัวทุกคนมากจริงๆ ขอให้น้องๆ
+            ทุกคนก้าวต่อไปอย่างมั่นใจ เจอเส้นทางที่ใช่
+            ประสบความสำเร็จในแบบของตัวเอง และมีความสุขกับทุกช่วงชีวิต
+            ขอให้ความพยายามของทุกคนพาไปเจอสิ่งที่ดีกว่าเสมอ
+            พี่จะคอยเอาใจช่วยอยู่ตรงนี้นะ 🤍
+          </p>
+          <br />
+          <p style="text-align: right">
+            <strong>- Bigchoun -</strong>
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- JavaScript -->
+    <script>
+      // 1. ฟังก์ชันโหลด Intro Screen และจัดการจุดพลุ
+      window.onload = function () {
+        // ซ่อน Intro Screen หลังจากผ่านไป 4 วินาที (ปรับให้ช้าลงตามแอนิเมชัน)
+        setTimeout(() => {
+          document.getElementById("introScreen").classList.add("hidden");
+
+          // รอให้จังหวะ Fade Out เสร็จสมบูรณ์ (ประมาณ 0.8 วิ) ค่อยจุดพลุ
+          setTimeout(() => {
+            triggerConfetti();
+          }, 800);
+        }, 4000);
+      };
+
+      // ฟังก์ชันจุดพลุ Confetti
+      function triggerConfetti() {
+        var duration = 3 * 1000;
+        var animationEnd = Date.now() + duration;
+        var defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 0 };
+
+        function randomInRange(min, max) {
+          return Math.random() * (max - min) + min;
+        }
+
+        var interval = setInterval(function () {
+          var timeLeft = animationEnd - Date.now();
+
+          if (timeLeft <= 0) {
+            return clearInterval(interval);
+          }
+
+          var particleCount = 50 * (timeLeft / duration);
+          // จุดพลุสีเหลืองและฟ้า ตามสีโรงเรียน
+          confetti(
+            Object.assign({}, defaults, {
+              particleCount,
+              origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 },
+              colors: ["#FFD700", "#5AB2FF", "#FFFFFF"],
+            }),
+          );
+          confetti(
+            Object.assign({}, defaults, {
+              particleCount,
+              origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 },
+              colors: ["#FFD700", "#5AB2FF", "#FFFFFF"],
+            }),
+          );
+        }, 250);
+      }
+
+      // 2. ฟังก์ชันเปลี่ยนรูปพื้นหลัง (Slideshow)
+      const images = document.querySelectorAll(".bg-image");
+      let currentImageIndex = 0;
+
+      setInterval(() => {
+        images[currentImageIndex].classList.remove("active");
+        currentImageIndex = (currentImageIndex + 1) % images.length;
+        images[currentImageIndex].classList.add("active");
+      }, 5000); // เปลี่ยนรูปทุก 5 วินาที
+
+      // 3. ฟังก์ชันเปิด-ปิด ซองจดหมาย
+      const envelopeBtn = document.getElementById("envelopeBtn");
+      const modal = document.getElementById("letterModal");
+
+      function openLetter() {
+        // เล่นแอนิเมชันเปิดซอง
+        envelopeBtn.classList.add("open");
+
+        // รอให้ฝาซองเปิดเสร็จ 0.6 วินาที แล้วค่อยแสดง Pop-up จดหมาย
+        setTimeout(() => {
+          modal.classList.add("show");
+        }, 600);
+      }
+
+      function closeLetter() {
+        modal.classList.remove("show");
+        // รีเซ็ตซองจดหมายให้กลับมาปิดเหมือนเดิม
+        setTimeout(() => {
+          envelopeBtn.classList.remove("open");
+        }, 400);
+      }
+
+      // ปิด Pop-up เมื่อคลิกพื้นที่ว่างรอบๆ
+      window.onclick = function (event) {
+        if (event.target == modal) {
+          closeLetter();
+        }
+        // เพิ่มการปิด Paper Modal ด้วย
+        const paperModal = document.getElementById("paperModal");
+        if (event.target == paperModal) {
+          closeBigchounPaper();
+        }
+      };
+
+      // ฟังก์ชันเปิด-ปิด กระดาษของ Bigchoun
+      const paperModal = document.getElementById("paperModal");
+      function openBigchounPaper() {
+        paperModal.classList.add("show");
+      }
+      function closeBigchounPaper() {
+        paperModal.classList.remove("show");
+      }
+
+      // 4. ระบบสุ่มคำอวยพร
+      const wishes = [
+        "ขอให้เจอเพื่อนกลุ่มใหม่ที่คลิกกันตั้งแต่วันแรก!",
+        "เกรด A จงสถิตอยู่กับน้องตลอด 4 ปี!",
+        "ขอให้มีชีวิตมหาลัยที่บาลานซ์ทั้งเรียนและเล่นได้อย่างลงตัวนะ",
+        "ตื่นสายได้ แต่อย่าลืมตื่นไปสอบไฟนอลล่ะ!",
+        "ขอให้เจอร้านข้าวหน้ามอที่อร่อยและให้เยอะๆ",
+        "โปรเจกต์ผ่านฉลุย พรีเซนต์ราบรื่น อาจารย์รักอาจารย์หลง!",
+        "ขอให้ค้นพบสิ่งที่ตัวเองชอบจริงๆ ในรั้วมหาลัยนะ",
+        "F มีไว้ให้คนอื่น ส่วน A มีไว้ให้พวกเรา!",
+        "เหนื่อยก็พัก ร้องไห้ได้ แต่อย่ายอมแพ้นะ คนเก่ง!",
+        "ขอให้ 4 ปีในมหาลัยเป็นช่วงเวลาที่มีความสุขที่สุด",
+      ];
+
+      const fortuneDisplay = document.getElementById("fortuneDisplay");
+
+      function generateFortune() {
+        // ทำเอฟเฟกต์กระพริบก่อนแสดงข้อความ
+        fortuneDisplay.style.opacity = 0;
+
+        setTimeout(() => {
+          const randomIndex = Math.floor(Math.random() * wishes.length);
+          fortuneDisplay.innerHTML = `"${wishes[randomIndex]}"`;
+          fortuneDisplay.style.opacity = 1;
+
+          // จุดพลุเล็กๆ ตอนกดสุ่มได้
+          confetti({
+            particleCount: 80,
+            spread: 70,
+            origin: { y: 0.8 },
+            colors: ["#FFD700", "#5AB2FF"],
+          });
+        }, 300);
+      }
+
+      // 5. ระบบคัดลอกลิงก์ (Copy Link)
+      function copyLink() {
+        const currentUrl = window.location.href;
+        const shareBtn = document.getElementById("shareBtn");
+        const originalText = shareBtn.innerHTML;
+
+        // สร้าง Input จำลองเพื่อคัดลอกข้อความ
+        const tempInput = document.createElement("input");
+        tempInput.value = currentUrl;
+        document.body.appendChild(tempInput);
+        tempInput.select();
+        document.execCommand("copy"); // ใช้ execCommand เพื่อให้แน่ใจว่าทำงานได้ทุกที่ (รวมถึง iFrame)
+        document.body.removeChild(tempInput);
+
+        // เปลียนสถานะปุ่มชั่วคราวให้รู้ว่าคัดลอกแล้ว
+        shareBtn.innerHTML = "✅ คัดลอกลิงก์แล้ว!";
+        shareBtn.style.backgroundColor = "#5AB2FF";
+        shareBtn.style.color = "#FFFFFF";
+
+        // กลับเป็นเหมือนเดิมใน 3 วินาที
+        setTimeout(() => {
+          shareBtn.innerHTML = originalText;
+          shareBtn.style.backgroundColor = "transparent";
+          shareBtn.style.color = "#5AB2FF";
+        }, 3000);
+      }
+    </script>
+  </body>
+</html>
